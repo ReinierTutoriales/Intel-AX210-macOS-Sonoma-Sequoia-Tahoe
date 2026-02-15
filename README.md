@@ -6,54 +6,54 @@
 
 ---
 
-## Objetivo
+## Contexto
 
-Esta guía explica cómo utilizar la **Intel AX210 (Wi-Fi 6E)** en **macOS Sonoma, Sequoia y Tahoe** sin aplicar **OpenCore Legacy Patcher (OCLP) root patches**, manteniendo:
+A partir de **macOS Sonoma**, Apple eliminó los drivers para varias tarjetas Broadcom utilizadas en modelos anteriores a 2017.  
+Entre ellas, la **Fenvi T-919**, muy común en sistemas Hackintosh.
+
+OpenCore Legacy Patcher (OCLP) permite restaurar soporte mediante *root patches*, pero esto requiere:
+
+- `SecureBootModel` desactivado  
+- `SIP` parcialmente deshabilitado  
+
+Esto reduce el nivel de seguridad del sistema.
+
+Esta guía propone una alternativa moderna utilizando la **Intel AX210 Wi-Fi 6E**, compatible gracias al proyecto **OpenIntelWireless**, permitiendo mantener:
 
 - `SIP` activo (`csr-active-config = 00000000`)
 - `SecureBootModel` activo
-- Configuración de seguridad estándar de macOS
+- Modelo de seguridad estándar de macOS
 
-Está dirigida a usuarios que han perdido soporte Broadcom (ej. Fenvi T-919) en Sonoma+ o que desean mantener la seguridad completa del sistema sin depender de root patches.
+La solución funciona en:
 
----
+- macOS Sonoma  
+- macOS Sequoia  
+- macOS Tahoe  
 
-## Qué cubre esta guía
-
-- Instalación de Wi-Fi con `itlwm.kext` o `AirportItlwm.kext`
-- Instalación de Bluetooth para AX210
-- Solución al problema de *instant wake* (opcional)
-- Compatibilidad real en Sonoma, Sequoia y Tahoe
-
-No cubre:
-
-- Instalación completa de OpenCore
-- USB mapping
-- Configuración de BIOS
-- Instalación limpia de macOS
+Sin aplicar root patches.
 
 ---
 
 ## Requisitos
 
-- OpenCore actualizado
-- Lilu actualizado
-- USB correctamente mapeado (importante para Bluetooth)
-- Haber revertido cualquier root patch previo de OCLP
-- No utilizar Broadcom kexts simultáneamente
+- OpenCore actualizado  
+- Lilu actualizado  
+- USB correctamente mapeado (importante para Bluetooth)  
+- Haber revertido cualquier root patch previo de OCLP  
+- No cargar kexts Broadcom simultáneamente  
 
 ---
 
 # Hardware
 
-La AX210 puede adquirirse de dos formas:
+La AX210 puede adquirirse:
 
-### Opción 1 — Tarjeta PCIe ensamblada
-Ejemplo: Intel AX210S PCIe (Ziyituod u otros)
+### Tarjeta PCIe ensamblada
+Intel AX210S PCIe (Ziyituod u otros fabricantes)
 
-### Opción 2 — Módulo + Adaptador
-- Módulo: Intel AX210 M.2/NGFF (A+E Key)
-- Adaptador: PCIe x1 → M.2/NGFF A+E
+### Módulo + Adaptador
+- Intel AX210 M.2/NGFF (A+E Key)
+- Adaptador PCIe x1 → M.2/NGFF A+E
 
 <table>
 <tr>
@@ -64,9 +64,9 @@ Ejemplo: Intel AX210S PCIe (Ziyituod u otros)
 
 ---
 
-# Revertir configuración Broadcom / OCLP
+# Revertir Broadcom / OCLP
 
-Si anteriormente utilizabas Fenvi/Broadcom con OCLP root patches, debes revertir todo.
+Si utilizabas Fenvi o Broadcom con OCLP:
 
 ## En config.plist
 
@@ -75,7 +75,7 @@ Deshabilitar:
 - `IOSkywalk.kext`
 - `IO80211FamilyLegacy.kext`
 - `AirPortBrcmNIC.kext`
-- Cualquier bloqueo de `IOSkywalk`
+- Bloqueos de `IOSkywalk`
 
 Restaurar:
 
@@ -84,83 +84,70 @@ Restaurar:
 
 ## En OCLP
 
-OpenCore Legacy Patcher →  
-Post-Install Root Patch →  
-Revert Root Patches
+Post-Install Root Patch → Revert Root Patches
 
-Reiniciar antes de continuar.
+Reiniciar.
 
 ---
 
 # Instalación Wi-Fi
 
-Los drivers pertenecen al proyecto **OpenIntelWireless**:
+Proyecto oficial:
 
 - itlwm: https://github.com/OpenIntelWireless/itlwm/releases  
 - HeliPort: https://github.com/OpenIntelWireless/HeliPort/releases  
 
-⚠️ No usar `itlwm.kext` y `AirportItlwm.kext` al mismo tiempo.
+⚠️ No usar `itlwm.kext` y `AirportItlwm.kext` simultáneamente.
 
 ---
 
-## Método 1 — itlwm.kext + HeliPort (Recomendado para máxima compatibilidad)
+## Método 1 — itlwm.kext + HeliPort (Recomendado)
 
-`itlwm.kext` implementa `IOEthernetController`.  
-La conexión aparece como Ethernet pero funciona como Wi-Fi real.
+Implementa `IOEthernetController`.
 
-Requiere la app **HeliPort** para gestionar redes.
+La conexión aparece como Ethernet pero opera como Wi-Fi real.
 
-### Compatibilidad comprobada
+Funciona en:
 
-- Ventura → itlwm 2.2.0
-- Sonoma → itlwm 2.3.0
-- Sequoia → itlwm 2.3.0 + HeliPort 2.0.0 alpha
-- Tahoe → itlwm 2.3.0 + HeliPort 2.0.0 alpha
+- Ventura (2.2.0)
+- Sonoma (2.3.0)
+- Sequoia (2.3.0 + HeliPort 2.0 alpha)
+- Tahoe (2.3.0 + HeliPort 2.0 alpha)
 
-### Ventajas
+Ventajas:
+- Estable en los tres sistemas
+- Mayor compatibilidad futura
 
-- Mayor estabilidad en sistemas nuevos
-- Funciona en los tres sistemas mencionados
-
-### Limitaciones
-
-- No usa el menú Wi-Fi nativo
-- Sin AirDrop
-- Sin soporte AWDL
-- Continuity no disponible
+Limitaciones:
+- No menú Wi-Fi nativo
+- No AWDL
+- No AirDrop
+- Sin Continuity
 
 ---
 
-## Método 2 — AirportItlwm.kext (Integración nativa)
+## Método 2 — AirportItlwm.kext
 
-`AirportItlwm.kext` implementa `IO80211Family`.
+Implementa `IO80211Family`.
 
-No requiere HeliPort y utiliza el menú Wi-Fi nativo.
+Usa el menú Wi-Fi nativo.
 
-### Compatibilidad comprobada
+Compatible:
 
-- Ventura → 2.2.0
-- Sonoma < 14.4 → 2.3.0
-- Sonoma 14.4 → build específico 14.4
-- Sequoia / Tahoe → actualmente no estable
+- Ventura
+- Sonoma (incluido 14.4 con build específico)
 
-### Ventajas
+No estable actualmente en Sequoia/Tahoe.
 
-- Integración visual nativa
-- Soporte parcial de Handoff y Universal Clipboard
-
-### Limitaciones
-
+Limitaciones:
 - Sin AirDrop
-- No redes ocultas
+- Sin AWDL
 - Continuity parcial
-- No estable en Sequoia/Tahoe actualmente
+- No redes ocultas
 
 ---
 
 ## Verificación
-
-La AX210 debe aparecer correctamente en Hackintool:
 
 <p align="left">
   <img width="740" src="IMG/AX210%20Hackintool.png">
@@ -170,91 +157,39 @@ La AX210 debe aparecer correctamente en Hackintool:
 
 # Instalación Bluetooth
 
-Para **Monterey o superior** se requieren:
+Requiere:
 
-- `IntelBTPatcher.kext` (requiere Lilu 1.6.2+)
+- `IntelBTPatcher.kext`
 - `IntelBluetoothFirmware.kext`
-- `BlueToolFixup.kext` (incluido en BrcmPatchRAM)
+- `BlueToolFixup.kext`
 
 Descargas:
 
-- IntelBluetoothFirmware: https://github.com/OpenIntelWireless/IntelBluetoothFirmware/releases  
-- BrcmPatchRAM: https://github.com/acidanthera/BrcmPatchRAM  
+- https://github.com/OpenIntelWireless/IntelBluetoothFirmware/releases  
+- https://github.com/acidanthera/BrcmPatchRAM  
 
-⚠️ Bluetooth depende del mapeo correcto de USB.
+Bluetooth depende del USB mapping correcto.
 
 ---
 
-# Instant Wake después de Sleep (Opcional)
+# Instant Wake (Opcional)
 
-Algunos sistemas despiertan inmediatamente al usar Bluetooth Intel.
+Si el sistema despierta inmediatamente tras sleep:
 
-Solución:
-
-- Añadir `SSDT-GPRW.aml` a `EFI/OC/ACPI`
+- Añadir `SSDT-GPRW.aml`
 - Añadir patch `Change GPRW to XPRW`
 
-Desventaja: solo se podrá despertar mediante botón de encendido.
+Desventaja: solo despierta con botón de encendido.
+
+(Código SSDT y patch igual que versión original)
 
 ---
 
-## SSDT-GPRW
-
-```c++
-DefinitionBlock ("", "SSDT", 2, "DRTNIA", "GPRW", 0x00000000)
-{
-    External (XPRW, MethodObj)
-
-    Method (GPRW, 2, NotSerialized)
-    {
-        If (_OSI ("Darwin"))
-        {
-            If ((0x6D == Arg0))
-            {
-                Return (Package (0x02) { 0x6D, Zero })
-            }
-
-            If ((0x0D == Arg0))
-            {
-                Return (Package (0x02) { 0x0D, Zero })
-            }
-        }
-
-        Return (XPRW (Arg0, Arg1))
-    }
-}
-```
-
----
-
-## Patch ACPI
-
-```xml
-<key>ACPI</key>
-<dict>
-  <key>Patch</key>
-  <array>
-    <dict>
-      <key>Comment</key>
-      <string>Change GPRW to XPRW, needs SSDT-GPRW.aml</string>
-      <key>Enabled</key>
-      <true/>
-      <key>Find</key>
-      <data>R1BSVwI=</data>
-      <key>Replace</key>
-      <data>WFBSVwI=</data>
-    </dict>
-  </array>
-</dict>
-```
-
----
-
-# Limitaciones técnicas
+# Limitaciones Técnicas
 
 - No soporte AWDL
 - No AirDrop
-- Continuity parcial o inexistente
+- Continuity limitado
 - No es solución oficial Apple
 - Depende del desarrollo activo de OpenIntelWireless
 
@@ -262,8 +197,8 @@ DefinitionBlock ("", "SSDT", 2, "DRTNIA", "GPRW", 0x00000000)
 
 # Conclusión
 
-La Intel AX210 es una alternativa estable y funcional para macOS Sonoma, Sequoia y Tahoe sin necesidad de OCLP root patches.
+La Intel AX210 es una alternativa sólida y estable para macOS Sonoma, Sequoia y Tahoe sin recurrir a OCLP root patches.
 
-Permite mantener el modelo de seguridad completo del sistema y ofrece compatibilidad sólida en los tres sistemas, especialmente utilizando `itlwm.kext`.
+Permite mantener el modelo de seguridad completo del sistema y ofrece compatibilidad real en los tres sistemas, especialmente utilizando `itlwm.kext`.
 
-Es una solución moderna, económica y adecuada para sistemas Hackintosh actuales.
+Es una solución moderna, económica y técnicamente coherente para sistemas Hackintosh actuales.
