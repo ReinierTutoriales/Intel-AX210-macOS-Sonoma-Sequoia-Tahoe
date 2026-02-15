@@ -1,7 +1,7 @@
 # Intel Wi-Fi 6/6E (AX210) on macOS Sonoma / Sequoia / Tahoe (Hackintosh)
 
 <p align="center">
-  <img src="img/Wi-Fi.png" alt="Wi-Fi" />
+  <img src="IMG/Wi-Fi.png" alt="Wi-Fi" />
 </p>
 
 ## Context (why this repo)
