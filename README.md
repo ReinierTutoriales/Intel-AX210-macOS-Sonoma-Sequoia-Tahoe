@@ -45,7 +45,7 @@ Ejemplo: Intel AX210S PCIe (Ziyituod u otros fabricantes)
 
 <table>
 <tr>
-<td><img src="main/IMG/Card%20and%20adapter.png"></td>
+<td><img src="main/IMG/Card and adapter.png"></td>
 <td><img src="main/IMG/AX210%20card.jpg"></td>
 </tr>
 </table>
