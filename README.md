@@ -172,16 +172,84 @@ Bluetooth depende del USB mapping correcto.
 
 ---
 
-# Instant Wake (Opcional)
+# Instant Wake después de Sleep (Opcional)
 
-Si el sistema despierta inmediatamente tras sleep:
+Algunos sistemas pueden experimentar el comportamiento de *instant wake* al utilizar Bluetooth Intel junto con los kexts de OpenIntelWireless: el equipo entra en sleep pero despierta inmediatamente.
 
-- Añadir `SSDT-GPRW.aml`
-- Añadir patch `Change GPRW to XPRW`
+Este comportamiento ha sido reportado en el repositorio oficial:
+https://github.com/OpenIntelWireless/IntelBluetoothFirmware/issues/477
 
-Desventaja: solo despierta con botón de encendido.
+El desarrollador no lo considera un problema directo del kext, pero en ciertos sistemas ocurre debido a la gestión ACPI de los métodos de wake.
 
-(Código SSDT y patch igual que versión original)
+## Solución
+
+1. Añadir `SSDT-GPRW.aml` a `EFI/OC/ACPI`
+2. Activar el patch ACPI:  
+   `Change GPRW to XPRW, needs SSDT-GPRW.aml`
+
+Con este ajuste el sistema entra correctamente en sleep.
+
+### Limitación
+
+Después de aplicar el patch:
+
+- El sistema solo podrá despertar mediante el botón de encendido.
+- Se pierde wake por teclado o mouse.
+
+Es un compromiso aceptable si se desea conservar la funcionalidad de sleep.
+
+---
+
+## SSDT-GPRW
+
+```c++
+DefinitionBlock ("", "SSDT", 2, "DRTNIA", "GPRW", 0x00000000)
+{
+    External (XPRW, MethodObj)
+
+    Method (GPRW, 2, NotSerialized)
+    {
+        If (_OSI ("Darwin"))
+        {
+            If ((0x6D == Arg0))
+            {
+                Return (Package (0x02) { 0x6D, Zero })
+            }
+
+            If ((0x0D == Arg0))
+            {
+                Return (Package (0x02) { 0x0D, Zero })
+            }
+        }
+
+        Return (XPRW (Arg0, Arg1))
+    }
+}
+```
+
+---
+
+## Patch ACPI
+
+```xml
+<key>ACPI</key>
+<dict>
+  <key>Patch</key>
+  <array>
+    <dict>
+      <key>Comment</key>
+      <string>Change GPRW to XPRW, needs SSDT-GPRW.aml</string>
+      <key>Enabled</key>
+      <true/>
+      <key>Find</key>
+      <data>R1BSVwI=</data>
+      <key>Replace</key>
+      <data>WFBSVwI=</data>
+    </dict>
+  </array>
+</dict>
+```
+
 
 ---
 
