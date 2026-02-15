@@ -1,7 +1,7 @@
 # Intel Wi-Fi 6 / 6E AX210 en macOS Sonoma, Sequoia y Tahoe (Hackintosh)
 
 <p align="center">
-  <img src="main/IMG/Wi-Fi.png">
+  <img src="IMG/Wi-Fi.png">
 </p>
 
 ---
@@ -45,8 +45,8 @@ Ejemplo: Intel AX210S PCIe (Ziyituod u otros fabricantes)
 
 <table>
 <tr>
-<td><img src="main/IMG/Card and adapter.png"></td>
-<td><img src="main/IMG/AX210%20card.jpg"></td>
+<td><img src="IMG/Card%20and%20adapter.png"></td>
+<td><img src="IMG/AX210%20card.jpg"></td>
 </tr>
 </table>
 
@@ -148,7 +148,7 @@ No requiere HeliPort.
 La tarjeta es correctamente detectada:
 
 <p align="left">
-<img width="740" src="main/IMG/AX210 Hackintool.png">
+  <img width="740" src="IMG/AX210%20Hackintool.png">
 </p>
 
 ---
@@ -245,21 +245,19 @@ Cambiando `Name=itlwm` por `Name=AirportItlwm`.
 ### Antes
 
 <p align="left">
-<img width="660" src="main/IMG/itlwm name.png">
+  <img width="660" src="IMG/itlwm%20name.png">
 </p>
-
 <p align="left">
-<img width="440" src="main/IMG/Hackintool itlwm.png">
+  <img width="440" src="IMG/Hackintool%20itlwm.png">
 </p>
 
 ### Después
 
 <p align="left">
-<img width="660" src="main/IMG/AirportItlwm name.png">
+  <img width="660" src="IMG/AirportItlwm%20name.png">
 </p>
-
 <p align="left">
-<img width="440" src="main/IMG/Hackintool AirportItlwm.png">
+  <img width="440" src="IMG/Hackintool%20AirportItlwm.png">
 </p>
 
 ---
