@@ -1,208 +1,194 @@
-# Intel Wi-Fi 6 / 6E AX210 en macOS Sonoma, Sequoia y Tahoe (Hackintosh)
+# Intel Wi-Fi 6 / 6E AX210 en macOS Sonoma, Sequoia y Tahoe
 
 <p align="center">
-  <img src="IMG/Wi-Fi.png">
+  <img src="IMG/Wi-Fi.png" alt="Intel AX210 Wi-Fi"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-Sonoma%20%7C%20Sequoia%20%7C%20Tahoe-000?style=flat-square&logo=apple&logoColor=white"/>
+  <img src="https://img.shields.io/badge/OpenCore-Compatible-2D3436?style=flat-square"/>
+  <img src="https://img.shields.io/badge/SIP-Activo-27ae60?style=flat-square"/>
+  <img src="https://img.shields.io/badge/SecureBootModel-Activo-27ae60?style=flat-square"/>
 </p>
 
 ---
 
 ## Contexto
 
-A partir de **macOS Sonoma**, Apple eliminó los drivers para varias tarjetas Broadcom utilizadas en modelos anteriores a 2017.  
-Entre ellas, la **Fenvi T-919**, muy común en sistemas Hackintosh.
+Desde **macOS Sonoma**, Apple eliminó los drivers para tarjetas Broadcom de modelos anteriores a 2017, incluyendo la **Fenvi T-919**, muy usada en sistemas Hackintosh.
 
-OpenCore Legacy Patcher (OCLP) permite restaurar soporte mediante *root patches*, pero esto requiere:
+OpenCore Legacy Patcher (OCLP) permite restaurar soporte mediante *root patches*, pero exige desactivar `SecureBootModel` y deshabilitar parcialmente `SIP`, reduciendo el nivel de seguridad del sistema.
 
-- `SecureBootModel` desactivado  
-- `SIP` parcialmente deshabilitado  
+Esta guía propone una alternativa con la **Intel AX210 Wi-Fi 6E**, compatible vía el proyecto **[OpenIntelWireless](https://github.com/OpenIntelWireless)**, que permite mantener:
 
-Esto reduce el nivel de seguridad del sistema.
+| Parámetro | Estado |
+|:---|:---|
+| `SIP` | ✅ Activo (`csr-active-config = 00000000`) |
+| `SecureBootModel` | ✅ Activo |
+| Root patches (OCLP) | ✅ No requeridos |
 
-Esta guía propone una alternativa moderna utilizando la **Intel AX210 Wi-Fi 6E**, compatible gracias al proyecto **OpenIntelWireless**, permitiendo mantener:
-
-- `SIP` activo (`csr-active-config = 00000000`)
-- `SecureBootModel` activo
-- Modelo de seguridad estándar de macOS
-
-La solución funciona en:
-
-- macOS Sonoma  
-- macOS Sequoia  
-- macOS Tahoe  
-
-Sin aplicar root patches.
+**Sistemas operativos compatibles:** macOS Sonoma · macOS Sequoia · macOS Tahoe
 
 ---
 
-## Requisitos
+## Requisitos previos
 
-- OpenCore actualizado  
-- Lilu actualizado  
-- USB correctamente mapeado (importante para Bluetooth)  
-- Haber revertido cualquier root patch previo de OCLP  
-- No cargar kexts Broadcom simultáneamente  
+- OpenCore actualizado
+- Lilu actualizado
+- USB correctamente mapeado *(crítico para Bluetooth)*
+- Root patches de OCLP revertidos (si aplica)
+- Kexts Broadcom desactivados
 
 ---
 
-# Hardware
+## Hardware compatible
 
-La AX210 puede adquirirse:
+La AX210 se puede adquirir de dos formas:
 
-### Tarjeta PCIe ensamblada
-Intel AX210S PCIe (Ziyituod u otros fabricantes)
+**Opción A — Tarjeta PCIe ensamblada**
+> Intel AX210S PCIe (Ziyituod u otros fabricantes) — lista para instalar directamente en slot PCIe x1.
 
-### Módulo + Adaptador
-- Intel AX210 M.2/NGFF (A+E Key)
-- Adaptador PCIe x1 → M.2/NGFF A+E
+**Opción B — Módulo + Adaptador**
+> Intel AX210 M.2/NGFF (A+E Key) + Adaptador PCIe x1 → M.2/NGFF A+E.
 
 <table>
 <tr>
-<td><img src="IMG/Card%20and%20adapter.png"></td>
-<td><img src="IMG/AX210%20card.jpg"></td>
+<td align="center"><img src="IMG/Card%20and%20adapter.png" alt="Módulo + Adaptador"/><br/><sub>Módulo + Adaptador</sub></td>
+<td align="center"><img src="IMG/AX210%20card.jpg" alt="Tarjeta AX210"/><br/><sub>Tarjeta AX210 M.2</sub></td>
 </tr>
 </table>
 
 ---
 
-# Revertir Broadcom / OCLP
+## Paso 1 — Revertir Broadcom / OCLP
 
-Si utilizabas Fenvi o Broadcom con OCLP:
+> ⚠️ Omitir este paso si nunca usaste Fenvi, Broadcom ni OCLP.
 
-## En config.plist
+### En `config.plist`
 
-Deshabilitar:
-
+**Deshabilitar los siguientes kexts:**
 - `IOSkywalk.kext`
 - `IO80211FamilyLegacy.kext`
 - `AirPortBrcmNIC.kext`
-- Bloqueos de `IOSkywalk`
 
-Restaurar:
+**Deshabilitar los bloqueos de** `IOSkywalk`
 
+**Restaurar valores de seguridad:**
 - `csr-active-config` → `00000000`
-- `SecureBootModel` → valor distinto de `Disabled`
+- `SecureBootModel` → cualquier valor distinto de `Disabled`
 
-## En OCLP
+### En OCLP
 
-Post-Install Root Patch → Revert Root Patches
-
-Reiniciar.
+Ir a **Post-Install Root Patch → Revert Root Patches** y reiniciar.
 
 ---
 
-# Instalación Wi-Fi
+## Paso 2 — Instalación Wi-Fi
 
-Proyecto oficial:
+Descargas oficiales:
 
-- itlwm: https://github.com/OpenIntelWireless/itlwm/releases  
-- HeliPort: https://github.com/OpenIntelWireless/HeliPort/releases  
+| Componente | Repositorio |
+|:---|:---|
+| `itlwm.kext` / `AirportItlwm.kext` | [OpenIntelWireless/itlwm](https://github.com/OpenIntelWireless/itlwm/releases) |
+| HeliPort | [OpenIntelWireless/HeliPort](https://github.com/OpenIntelWireless/HeliPort/releases) |
 
-⚠️ No usar `itlwm.kext` y `AirportItlwm.kext` simultáneamente.
+> ⚠️ **No cargar `itlwm.kext` y `AirportItlwm.kext` simultáneamente.**
 
 ---
 
-## Método 1 — itlwm.kext + HeliPort (Recomendado)
+### Método 1 — `itlwm.kext` + HeliPort *(Recomendado)*
 
-Implementa `IOEthernetController`.
+Implementa `IOEthernetController`. La conexión aparece como Ethernet pero opera como Wi-Fi real. HeliPort actúa como cliente de gestión de redes.
 
-La conexión aparece como Ethernet pero opera como Wi-Fi real.
+| macOS | Versión requerida |
+|:---|:---|
+| Ventura | itlwm 2.2.0 + HeliPort |
+| Sonoma | itlwm 2.3.0 + HeliPort |
+| Sequoia | itlwm 2.3.0 + HeliPort 2.0 alpha |
+| Tahoe | itlwm 2.3.0 + HeliPort 2.0 alpha |
 
-Funciona en:
-
-- Ventura (2.2.0)
-- Sonoma (2.3.0)
-- Sequoia (2.3.0 + HeliPort 2.0 alpha)
-- Tahoe (2.3.0 + HeliPort 2.0 alpha)
-
-Ventajas:
-- Estable en los tres sistemas
+**✅ Ventajas**
+- Estable en Sonoma, Sequoia y Tahoe
 - Mayor compatibilidad futura
+- No requiere build específico por versión de macOS
 
-Limitaciones:
-- No menú Wi-Fi nativo
-- No AWDL
-- No AirDrop
-- Sin Continuity
+**⚠️ Limitaciones**
+- Sin menú Wi-Fi nativo
+- Sin AWDL / AirDrop / Continuity
 
 ---
 
-## Método 2 — AirportItlwm.kext
+### Método 2 — `AirportItlwm.kext`
 
-Implementa `IO80211Family`.
+Implementa `IO80211Family`, usando el **menú Wi-Fi nativo** de macOS.
 
-Usa el menú Wi-Fi nativo.
+| macOS | Estado |
+|:---|:---|
+| Ventura | ✅ Estable |
+| Sonoma 14.x | ✅ Estable (build específico por versión) |
+| Sequoia | ❌ No estable actualmente |
+| Tahoe | ❌ No estable actualmente |
 
-Compatible:
-
-- Ventura
-- Sonoma (incluido 14.4 con build específico)
-
-No estable actualmente en Sequoia/Tahoe.
-
-Limitaciones:
-- Sin AirDrop
-- Sin AWDL
+**⚠️ Limitaciones**
+- Sin AirDrop / AWDL
 - Continuity parcial
-- No redes ocultas
+- No detecta redes ocultas
+- Requiere actualizar el kext en cada actualización de macOS
 
 ---
 
-## Verificación
+### Verificación
 
 <p align="left">
-  <img width="740" src="IMG/AX210%20Hackintool.png">
+  <img width="740" src="IMG/AX210%20Hackintool.png" alt="Verificación en Hackintool"/>
 </p>
 
 ---
 
-# Instalación Bluetooth
+## Paso 3 — Instalación Bluetooth
 
-Requiere:
+| Kext | Función |
+|:---|:---|
+| `IntelBTPatcher.kext` | Patcher de inicialización BT |
+| `IntelBluetoothFirmware.kext` | Firmware del adaptador |
+| `BlueToolFixup.kext` | Fix para macOS Monterey+ |
 
-- `IntelBTPatcher.kext`
-- `IntelBluetoothFirmware.kext`
-- `BlueToolFixup.kext`
+**Descargas:**
+- [OpenIntelWireless/IntelBluetoothFirmware](https://github.com/OpenIntelWireless/IntelBluetoothFirmware/releases)
+- [acidanthera/BrcmPatchRAM](https://github.com/acidanthera/BrcmPatchRAM) *(BlueToolFixup)*
 
-Descargas:
-
-- https://github.com/OpenIntelWireless/IntelBluetoothFirmware/releases  
-- https://github.com/acidanthera/BrcmPatchRAM  
-
-Bluetooth depende del USB mapping correcto.
-
----
-
-# Instant Wake después de Sleep (Opcional)
-
-Algunos sistemas pueden experimentar el comportamiento de *instant wake* al utilizar Bluetooth Intel junto con los kexts de OpenIntelWireless: el equipo entra en sleep pero despierta inmediatamente.
-
-Este comportamiento ha sido reportado en el repositorio oficial:
-https://github.com/OpenIntelWireless/IntelBluetoothFirmware/issues/477
-
-El desarrollador no lo considera un problema directo del kext, pero en ciertos sistemas ocurre debido a la gestión ACPI de los métodos de wake.
-
-## Solución
-
-1. Añadir `SSDT-GPRW.aml` a `EFI/OC/ACPI`
-2. Activar el patch ACPI:  
-   `Change GPRW to XPRW, needs SSDT-GPRW.aml`
-
-Con este ajuste el sistema entra correctamente en sleep.
-
-### Limitación
-
-Después de aplicar el patch:
-
-- El sistema solo podrá despertar mediante el botón de encendido.
-- Se pierde wake por teclado o mouse.
-
-Es un compromiso aceptable si se desea conservar la funcionalidad de sleep.
+> ⚠️ El Bluetooth depende de un **USB mapping correcto**. Si BT no aparece, verificar el mapa USB antes de continuar.
 
 ---
 
-## SSDT-GPRW
+## (Opcional) Fix Instant Wake tras Sleep
 
-```c++
+En algunos sistemas, los kexts de Bluetooth Intel provocan *instant wake*: el equipo entra en sleep pero despierta inmediatamente por una interrupción ACPI.
+
+Issue de referencia: [#477 — OpenIntelWireless/IntelBluetoothFirmware](https://github.com/OpenIntelWireless/IntelBluetoothFirmware/issues/477)
+
+### Solución — SSDT-GPRW
+
+**1.** Añadir `SSDT-GPRW.aml` a `EFI/OC/ACPI`
+
+**2.** Activar el siguiente patch en `config.plist → ACPI → Patch`:
+
+```xml
+<dict>
+  <key>Comment</key>
+  <string>Change GPRW to XPRW, needs SSDT-GPRW.aml</string>
+  <key>Enabled</key>
+  <true/>
+  <key>Find</key>
+  <data>R1BSVwI=</data>
+  <key>Replace</key>
+  <data>WFBSVwI=</data>
+</dict>
+```
+
+**Código fuente del SSDT:**
+
+```c
 DefinitionBlock ("", "SSDT", 2, "DRTNIA", "GPRW", 0x00000000)
 {
     External (XPRW, MethodObj)
@@ -227,46 +213,32 @@ DefinitionBlock ("", "SSDT", 2, "DRTNIA", "GPRW", 0x00000000)
 }
 ```
 
----
-
-## Patch ACPI
-
-```xml
-<key>ACPI</key>
-<dict>
-  <key>Patch</key>
-  <array>
-    <dict>
-      <key>Comment</key>
-      <string>Change GPRW to XPRW, needs SSDT-GPRW.aml</string>
-      <key>Enabled</key>
-      <true/>
-      <key>Find</key>
-      <data>R1BSVwI=</data>
-      <key>Replace</key>
-      <data>WFBSVwI=</data>
-    </dict>
-  </array>
-</dict>
-```
-
+> ⚠️ **Limitación conocida:** Con este patch activo, el sistema solo puede despertar desde sleep mediante el **botón de encendido**. Se pierde wake por teclado y mouse.
 
 ---
 
-# Limitaciones Técnicas
+## Limitaciones técnicas
 
-- No soporte AWDL
-- No AirDrop
-- Continuity limitado
-- No es solución oficial Apple
-- Depende del desarrollo activo de OpenIntelWireless
+| Función | Estado |
+|:---|:---|
+| AWDL | ❌ No soportado |
+| AirDrop | ❌ No soportado |
+| Continuity (Handoff, Universal Clipboard) | ⚠️ Parcial |
+| Sidecar inalámbrico | ❌ No soportado |
+| Menú Wi-Fi nativo (Sequoia/Tahoe) | ⚠️ Solo con `itlwm` + HeliPort |
 
 ---
 
-# Conclusión
+## Conclusión
 
-La Intel AX210 es una alternativa sólida y estable para macOS Sonoma, Sequoia y Tahoe sin recurrir a OCLP root patches.
+La Intel AX210 es la alternativa más sólida y técnicamente coherente para Wi-Fi en macOS Sonoma, Sequoia y Tahoe sin recurrir a OCLP root patches.
 
-Permite mantener el modelo de seguridad completo del sistema y ofrece compatibilidad real en los tres sistemas, especialmente utilizando `itlwm.kext`.
+Mantiene el modelo de seguridad completo del sistema, funciona con `SIP` y `SecureBootModel` activos, y con `itlwm.kext` ofrece compatibilidad estable en los tres sistemas operativos actuales.
 
-Es una solución moderna, económica y técnicamente coherente para sistemas Hackintosh actuales.
+Para la mayoría de sistemas Hackintosh modernos, esta es la ruta recomendada.
+
+---
+
+<div align="center">
+<sub>Guía por <a href="https://www.reiniertutoriales.com/">ReinierTutoriales</a> · Basada en <a href="https://github.com/OpenIntelWireless">OpenIntelWireless</a></sub>
+</div>
